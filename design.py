@@ -20,12 +20,13 @@ def combobox_callback(choice):
     print("combobox dropdown clicked:", choice)
 
 def check_key(event: bool) -> bool:
-   if (value := event.widget.get()) =='':
-       data = data_list
-   else:
-       data = [item for item in data_list if value.lower() in item.lower()]
+    value = event.widget.get()
+    if value == '':
+        data = data_list
+    else:
+        data = [item for item in data_list if value.lower() in item.lower()]
                                     
-   update(data)
+    update(data)
 
 def update(data: str) -> None:  
     item_listbox.delete(0, 'end')
@@ -70,8 +71,8 @@ def quantity_input(event=None):
             entry.destroy()
             move_to_next_row()  # After saving, move to next
 
-        entry.bind("<Return>", save_edit)  # Save on Enter
         entry.bind("<Tab>", save_edit)      # Save on Tab
+        # entry.bind("<Return>", save_edit)  # Save on Enter
         entry.bind("<FocusOut>", lambda e: entry.destroy())  # Destroy if focus is lost 
 
 def move_to_next_row():
@@ -99,9 +100,10 @@ def add_row_from_listbox(event):
         data = json.load(f)
 
     for d in data:
-        if selected_item in d['ITEM DESCRIPTION']:
-            app.count += 1
-            tree.insert("", "end", values=(app.count, "", d["ITEM DESCRIPTION"], str(d["Id"]).replace(".0", ""), "DELETE"))
+        if selected_item == d['ITEM DESCRIPTION']:
+            row_number = len(tree.get_children()) + 1
+            tree.insert("", "end", values=(row_number, "", d["ITEM DESCRIPTION"], str(d["Id"]).replace(".0", ""), "DELETE"))
+
 
 def delete_all():
     for row in tree.get_children():
@@ -253,7 +255,7 @@ tree = ttk.Treeview(right_frame, columns=columns, show="headings")
 
 # Define a style
 style = ttk.Style(right_frame)
-style.configure("Treeview", font=("Helvetica", 14))           # <-- Table text
+style.configure("Treeview", font=("Helvetica", 14), rowheight=40)           # <-- Table text
 style.configure("Treeview.Heading", font=("Helvetica", 20, "bold")) # <-- Column headers
 
 # Define headings
@@ -272,12 +274,14 @@ tree.column("Action", anchor="center", width=100)
 
 # Pack the Treeview
 tree.pack(fill="both", expand=True, padx=(0, 20), pady=(30, 100))     # <-- Top + Right + bottom margin
+
 # Bind a click
 tree.bind("<Button-1>", on_tree_click)
+
 # Bind one click to create entry, Bind Enter and Tab key to start editing
 tree.bind("<ButtonRelease-1>", quantity_input)
 tree.bind("<Tab>", lambda event: quantity_input())
-tree.bind("<Return>", lambda event: quantity_input())
+# tree.bind("<Return>", lambda event: quantity_input())
 
 # ========================================================================
 app.mainloop()
